@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Dashboard</title>
+
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: linear-gradient(135deg, #4e73df, #1cc88a);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .dashboard {
+        width: 900px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+        padding: 20px;
+    }
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .profile {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .profile img {
+        width: 100px;
+        height: 120px;
+        border-radius: 50%;
+        border: 3px solid #4e73df;
+    }
+
+    .profile-info h2 {
+        margin: 0;
+    }
+
+    .edit-btn {
+        padding: 8px 15px;
+        border: none;
+        background: #4e73df;
+        color: white;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    .edit-btn:hover {
+        background: #2e59d9;
+    }
+
+    .section {
+        margin-top: 20px;
+    }
+
+    .progress-bar {
+        background: #ddd;
+        overflow: hidden;
+    }
+
+    .progress {
+        height: 20px;
+        background: #1cc88a;
+        text-align: right;
+        padding-right: 5px;
+        color: white;
+        font-size: 12px;
+        line-height: 20px;
+    }
+
+    .attendance {
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    .footer {
+        text-align: right;
+        margin-top: 20px;
+        font-size: 14px;
+        color: gray;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="dashboard">
+    
+    <div class="header">
+        <div class="profile">
+            <img src="./Gemini_Generated_Image_po7mukpo7mukpo7m.png" alt="Student">
+            <div class="profile-info">
+                <h2 id="studentName">Alan John</h2>
+                <p>B.E Electronics and Communication Engineering</p>
+                <p>USN : 1HK22EC010</p>
+            </div>
+        </div>
+        <button class="edit-btn" onclick="editProfile()">Edit Profile</button>
+    </div>
+
+    <div class="section">
+        <h3>SUBJECT PERFORMANCE</h3>
+
+        <p>Mathematics : 85</p>
+        
+
+        <p>Embedded Systems : 91</p>
+        
+
+        <p>Digital Signal Processing : 86</p>
+        
+
+        <p>DSD Verilog : 97</p>
+        
+
+        <p>Data Structures : 81</p>
+        
+
+        <p>English : 97</p>
+        
+    </div>
+
+    <div class="section">
+        <h3>ATTENDENCE : 98%</h3>
+    </div>
+
+    <div class="section">
+        <h3>SGPA: 9.1</h3>
+    </div>
+
+    <div class="section">
+        <h3>TOTAL CGPA: 8.33</h3>
+    </div>
+
+</div>
+
+</body>
+</html>
