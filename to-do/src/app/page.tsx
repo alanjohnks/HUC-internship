@@ -14,7 +14,14 @@ export default function Home() {
   };
 
   useEffect(() => {
-    fetchTodos();
+    const user = localStorage.getItem("user");
+
+    // 🔐 Protect route
+    if (!user) {
+      window.location.href = "/login";
+    } else {
+      fetchTodos();
+    }
   }, []);
 
   const addTodo = async () => {
@@ -48,12 +55,42 @@ export default function Home() {
     fetchTodos();
   };
 
+  const toggleComplete = async (id: string, currentStatus: boolean) => {
+    await fetch("/api/todos", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id,
+        completed: !currentStatus,
+      }),
+    });
+
+    fetchTodos();
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    window.location.href = "/login";
+  };
+
   return (
     <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center p-6">
-      
-     
 
-      
+      {/* 🔥 Header */}
+      <div className="w-full max-w-md flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Todo App</h1>
+
+        <button
+          onClick={handleLogout}
+          className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded"
+        >
+          Logout
+        </button>
+      </div>
+
+      {/* Input Section */}
       <div className="bg-slate-800 p-6 rounded-xl shadow-lg w-full max-w-md space-y-4">
         
         <input
@@ -78,7 +115,7 @@ export default function Home() {
         </button>
       </div>
 
-      
+      {/* Todo List */}
       <div className="w-full max-w-md mt-6 space-y-4">
         {todos.map((todo) => {
           const today = new Date();
@@ -93,7 +130,14 @@ export default function Home() {
               className="bg-slate-800 p-4 rounded-xl shadow flex justify-between items-center"
             >
               <div>
-                <h2 className="font-semibold text-lg">{todo.title}</h2>
+                <h2
+                  className={`font-semibold text-lg ${
+                    todo.completed ? "line-through text-gray-400" : ""
+                  }`}
+                >
+                  {todo.title}
+                </h2>
+
                 <p className="text-sm text-gray-400">
                   {diffDays > 0
                     ? `${diffDays} day${diffDays > 1 ? "s" : ""} left`
@@ -101,12 +145,23 @@ export default function Home() {
                 </p>
               </div>
 
-              <button
-                onClick={() => deleteTodo(todo._id)}
-                className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-sm"
-              >
-                Delete
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() =>
+                    toggleComplete(todo._id, todo.completed)
+                  }
+                  className="bg-green-600 hover:bg-green-700 px-3 py-1 rounded"
+                >
+                  {todo.completed ? "Undo" : "Complete"}
+                </button>
+
+                <button
+                  onClick={() => deleteTodo(todo._id)}
+                  className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           );
         })}

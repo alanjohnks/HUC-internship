@@ -47,3 +47,23 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ error: "Failed to delete" }, { status: 500 });
   }
 }
+
+
+export async function PUT(req: Request) {
+  try {
+    await connectDB();
+
+    const { id, completed } = await req.json();
+
+    const updatedTodo = await Todo.findByIdAndUpdate(
+      id,
+      { completed },
+      { new: true }
+    );
+
+    return NextResponse.json(updatedTodo);
+  } catch (error) {
+    console.error("UPDATE ERROR:", error);
+    return NextResponse.json({ error: "Failed to update" }, { status: 500 });
+  }
+}
