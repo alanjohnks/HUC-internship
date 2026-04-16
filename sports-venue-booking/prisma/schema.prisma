@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+
+
+model User {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  name     String
+  email    String   @unique
+  password String
+  role     Role     @default(USER)
+
+  venues   Venue[]
+  bookings Booking[]
+}
+
+model Venue {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  sport     String
+  price     Float
+  approved  Boolean  @default(false)
+
+  ownerId   String   @db.ObjectId
+  owner     User     @relation(fields: [ownerId], references: [id])
+
+  slots     Slot[]
+}
+
+model Slot {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  time      String
+  isBooked  Boolean  @default(false)
+
+  venueId   String   @db.ObjectId
+  venue     Venue    @relation(fields: [venueId], references: [id])
+
+  booking   Booking?
+}
+
+model Booking {
+  id      String  @id @default(auto()) @map("_id") @db.ObjectId
+
+  userId  String  @db.ObjectId
+  user    User    @relation(fields: [userId], references: [id])
+
+  slotId  String  @unique @db.ObjectId
+  slot    Slot    @relation(fields: [slotId], references: [id])
+}
+
+enum Role {
+  USER
+  OWNER
+  ADMIN
+}
