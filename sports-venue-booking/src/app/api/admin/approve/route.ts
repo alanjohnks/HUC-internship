@@ -7,12 +7,11 @@ import { getUserFromRequest } from "@/lib/getUser";
 
 export async function POST(req: Request) {
   try {
-    const user = getUserFromRequest(req); // ✅ get from token
-
+    const user = getUserFromRequest(req); 
     const body = await req.json();
     const { venueId } = body;
 
-    await requireRole(user.id, "ADMIN"); // ✅ FIXED
+    await requireRole(user.id, "ADMIN"); 
 
     const venue = await prisma.venue.update({
       where: { id: venueId },
