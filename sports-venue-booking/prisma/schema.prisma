@@ -27,6 +27,7 @@ model Venue {
   images   String[]
 
   ownerId String @db.ObjectId
+  approved Boolean @default(false)
   owner   User   @relation(fields: [ownerId], references: [id])
 
   slots Slot[]

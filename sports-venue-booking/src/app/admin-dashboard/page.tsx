@@ -1,22 +1,24 @@
-import Sidebar from "../components/Sidebar";
-import Header from "../components/Header";
-import StatsCards from "../components/StatsCards";
-import ApprovalTable from "../components/ApprovalTable";
-import UserModeration from "../components/UserModeration";
+"use client";
 
-export default function Page() {
+import { useState } from "react";
+import AdminSidebar from "../components/AdminSidebar";
+import PendingVenues from "../components/PendingVenues";
+import AdminBookings from "../components/AdminBookings";
+
+export default function AdminDashboard() {
+  const [active, setActive] = useState("dashboard");
+
   return (
-    <div>
-      <Sidebar />
+    <div className="min-h-screen">
+      <AdminSidebar active={active} setActive={setActive} />
 
-      <main className="ml-64 min-h-screen p-8 bg-surface">
-        <Header />
-        <StatsCards />
+      <main className="ml-64 p-8 space-y-10">
+        {active === "dashboard" && (
+          <h1 className="text-3xl font-bold">Welcome Admin 👨‍💻</h1>
+        )}
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
-          <ApprovalTable />
-          <UserModeration />
-        </div>
+        {active === "pending" && <PendingVenues />}
+        {active === "bookings" && <AdminBookings />}
       </main>
     </div>
   );

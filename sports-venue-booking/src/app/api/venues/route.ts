@@ -29,25 +29,26 @@ export async function POST(req: Request) {
         location: location || null,
         images: images && images.length > 0 ? images : [], // avoid crash
         ownerId: user.id,
+        approved: false,
         slots: {
-      create: [
-        { time: "6:00 AM" },
-        { time: "7:00 AM" },
-        { time: "8:00 AM" },
-        { time: "9:00 AM" },
-        { time: "10:00 AM" },
-        { time: "11:00 AM" },
-        { time: "12:00 PM" },
-        { time: "1:00 PM" },
-        { time: "2:00 PM" },
-        { time: "3:00 PM" },
-        { time: "4:00 PM" },
-        { time: "5:00 PM" },
-        { time: "6:00 PM" },
-        { time: "7:00 PM" },
-        { time: "8:00 PM" },
-      ]
-    },
+          create: [
+            { time: "6:00 AM" },
+            { time: "7:00 AM" },
+            { time: "8:00 AM" },
+            { time: "9:00 AM" },
+            { time: "10:00 AM" },
+            { time: "11:00 AM" },
+            { time: "12:00 PM" },
+            { time: "1:00 PM" },
+            { time: "2:00 PM" },
+            { time: "3:00 PM" },
+            { time: "4:00 PM" },
+            { time: "5:00 PM" },
+            { time: "6:00 PM" },
+            { time: "7:00 PM" },
+            { time: "8:00 PM" },
+          ],
+        },
       },
     });
 
@@ -65,7 +66,11 @@ export async function POST(req: Request) {
 export async function GET() {
   try {
     const venues = await prisma.venue.findMany({
+      where: {
+        approved: true,
+      },
       include: {
+        owner: true,
         slots: true,
       },
     });
