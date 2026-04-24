@@ -21,12 +21,13 @@ export default function LoginPage() {
       const res = await loginUser({ email, password });
 
       if (res.user) {
-  router.push("/dashboard");
-} else {
-  console.log(res)
-  alert(res.error || "Login failed");
-}
-
+        localStorage.setItem("user", JSON.stringify(res.user));
+        localStorage.setItem("token", res.token);
+        router.push("/dashboard");
+      } else {
+        console.log(res);
+        alert(res.error || "Login failed");
+      }
     } catch (err) {
       console.error(err);
       alert("Something went wrong");
@@ -34,9 +35,10 @@ export default function LoginPage() {
   };
 
   return (
-    <main className={`min-h-screen flex items-center justify-center p-4 bg-gray-50 ${manrope.className}`}>
+    <main
+      className={`min-h-screen flex items-center justify-center p-4 bg-gray-50 ${manrope.className}`}
+    >
       <div className="w-full max-w-6xl grid md:grid-cols-2 bg-white rounded-xl overflow-hidden shadow-lg">
-
         {/* Left Section */}
         <section
           className="hidden md:flex flex-col justify-between p-12 text-white"
@@ -67,7 +69,6 @@ export default function LoginPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-
             {/* Email */}
             <div>
               <label className="text-xs font-bold uppercase text-gray-700">

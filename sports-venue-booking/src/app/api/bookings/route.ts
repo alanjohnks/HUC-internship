@@ -8,7 +8,7 @@ import { verifyToken } from "@/lib/auth";
 
 export async function GET() {
   try {
-    const cookieStore = await cookies(); 
+    const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
 
     if (!token) {
@@ -22,23 +22,25 @@ export async function GET() {
         userId: decoded.id,
       },
       include: {
-        slot: true,
+        slot: {
+          include: {
+            venue: true,
+          },
+        },
         user: true,
       },
     });
-    console.log(bookings)
+    console.log(bookings);
 
     return NextResponse.json(bookings);
   } catch (err: any) {
     console.error(err);
     return NextResponse.json(
       { error: "Failed to fetch bookings" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-
-
 
 export async function POST(req: Request) {
   try {
@@ -76,9 +78,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json(result);
   } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: error.message }, { status: 400 });
   }
 }

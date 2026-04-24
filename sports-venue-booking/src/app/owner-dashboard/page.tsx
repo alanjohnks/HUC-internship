@@ -1,28 +1,35 @@
-import Sidebar from "../components/Sidebar";
-import Topbar from "../components/Topbar";
-import AnalyticsCards from "../components/AnalyticsCards";
-import VenueList from "../components/VenueList";
-import ActivityTable from "../components/ActivityTable";
+"use client";
+
+import { useState } from "react";
+import OwnerSidebar from "../components/OwnerSidebar";
+import AddVenue from "../components/AddVenue";
+import MyVenues from "../components/MyVenues";
+import OwnerBookings from "../components/OwnerBookings";
 
 export default function OwnerDashboard() {
+  const [active, setActive] = useState("dashboard");
+
   return (
-    <div className="text-on-surface">
-      
-      <Sidebar />
+    <div className="text-on-surface min-h-screen">
+      <OwnerSidebar active={active} setActive={setActive} />
 
-      <main className="ml-64 min-h-screen">
+      <main className="ml-64 p-8 space-y-10">
 
-        <Topbar />
+        {/* DASHBOARD */}
+        {active === "dashboard" && (
+          <h1 className="text-3xl font-bold">
+            Welcome Owner 👋
+          </h1>
+        )}
 
-        <div className="p-8 max-w-[1440px] mx-auto space-y-10">
+        {/* ADD VENUE */}
+        {active === "add" && <AddVenue />}
 
-          <AnalyticsCards />
+        {/* MY VENUES */}
+        {active === "venues" && <MyVenues />}
 
-          <VenueList />
-
-          <ActivityTable />
-
-        </div>
+        {/* BOOKINGS */}
+        {active === "bookings" && <OwnerBookings />}
 
       </main>
     </div>

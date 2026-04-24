@@ -1,7 +1,7 @@
-import { getAnalyticsData } from "../data/ownerDummyData";
+
 
 export default function AnalyticsCards() {
-  const data = getAnalyticsData();
+  const data =
 
   return (
     <section>

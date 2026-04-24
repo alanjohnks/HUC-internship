@@ -1,4 +1,4 @@
-import { verifyToken } from "./auth";
+import jwt from "jsonwebtoken";
 
 export function getUserFromRequest(req: Request) {
   const authHeader = req.headers.get("authorization");
@@ -9,5 +9,10 @@ export function getUserFromRequest(req: Request) {
 
   const token = authHeader.split(" ")[1];
 
-  return verifyToken(token);
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!);
+    return decoded as { id: string };
+  } catch (err) {
+    throw new Error("Invalid signature");
+  }
 }

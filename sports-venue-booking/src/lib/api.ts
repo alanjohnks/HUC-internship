@@ -14,25 +14,35 @@ export const fetchVenues = async () => {
 };
 
 export const fetchBookings = async () => {
-  const res = await fetch("/api/bookings", {
-    credentials: "include",
-  });
+  try {
+    const res = await fetch("/api/bookings", {
+      credentials: "include",
+    });
 
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({}));
-    throw new Error(error.error || "Request failed");
+    const data = await res.json().catch(() => null);
+
+    console.log("STATUS:", res.status);
+    console.log("DATA:", data);
+
+    if (!res.ok) {
+      throw new Error(data?.error || "Request failed");
+    }
+
+    return data;
+  } catch (err) {
+    console.error("FETCH ERROR:", err);
+    throw err;
   }
-
-  return res.json();
 };
 
 
 
 
 
+export const bookSlot = async (slotId: string) => {
+  const token = localStorage.getItem("token");
 
-export const bookSlot = async (slotId: string, token: string) => {
-  const res = await fetch(`${BASE_URL}/bookings`, {
+  const res = await fetch("/api/bookings", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
