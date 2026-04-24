@@ -8,7 +8,7 @@ export async function POST(req: Request) {
   try {
     const user = getUserFromRequest(req);
 
-    const body = await req.json(); // ✅ only once
+    const body = await req.json(); 
     const { name, sport, price } = body;
 
     await requireRole(user.id, "OWNER");
@@ -34,9 +34,25 @@ export async function POST(req: Request) {
 
 
 export async function GET() {
-  const venues = await prisma.venue.findMany({
-    where: { approved: true },
-  });
+  try {
+    const venues = await prisma.venue.findMany({
+      include: {
+        slots: true,
+      },
+    });
 
-  return NextResponse.json(venues);
+    return NextResponse.json(venues);
+
+  } catch (error: any) {
+  console.error("VENUES ERROR FULL:", error); 
+
+  return NextResponse.json(
+    { error: error.message }, 
+    { status: 500 }
+  );
 }
+
+}
+
+
+

@@ -7,6 +7,7 @@ export async function POST(req: Request) {
   try {
     const { email, password } = await req.json();
 
+    // 🔍 Check if user exists
     const user = await prisma.user.findUnique({
       where: { email },
     });
@@ -18,6 +19,7 @@ export async function POST(req: Request) {
       );
     }
 
+    // 🔐 Compare password
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
@@ -27,19 +29,36 @@ export async function POST(req: Request) {
       );
     }
 
+    // 🪪 Generate JWT token
     const token = signToken(user);
 
-    return NextResponse.json({
-      token,
+    // ✅ Create response
+    const response = NextResponse.json({
+      message: "Login successful",
+      token:token,
       user: {
         id: user.id,
-        role: user.role,
         email: user.email,
+        role: user.role,
       },
     });
+
+    // 🍪 Set HTTP-only cookie
+    response.cookies.set("token", token, {
+      httpOnly: true,
+      secure: false, // ⚠️ change to true in production (HTTPS)
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24, // 1 day
+    });
+
+    return response;
+
   } catch (error: any) {
+    console.error("LOGIN API ERROR:", error);
+
     return NextResponse.json(
-      { error: error.message },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
