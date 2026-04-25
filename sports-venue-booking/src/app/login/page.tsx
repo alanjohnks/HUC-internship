@@ -21,11 +21,21 @@ export default function LoginPage() {
       const res = await loginUser({ email, password });
 
       if (res.user) {
+        // ✅ store auth
         localStorage.setItem("user", JSON.stringify(res.user));
         localStorage.setItem("token", res.token);
-        router.push("/dashboard");
+
+        // 🔥 role-based routing
+        const role = res.user.role;
+
+        if (role === "ADMIN") {
+          router.push("/admin-dashboard");
+        } else if (role === "OWNER") {
+          router.push("/owner-dashboard");
+        } else {
+          router.push("/dashboard"); // USER
+        }
       } else {
-        console.log(res);
         alert(res.error || "Login failed");
       }
     } catch (err) {
