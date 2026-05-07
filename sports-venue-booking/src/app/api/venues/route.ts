@@ -7,48 +7,80 @@ export async function POST(req: Request) {
   try {
     const user = getUserFromRequest(req);
 
-    const body = await req.json();
-    const { name, sport, price, location, images } = body;
-
-    // 🔐 Role check
     await requireRole(user.id, "OWNER");
 
-    // ✅ Basic validation
-    if (!name || !sport || !price) {
+    const body = await req.json();
+
+    const {
+      name,
+      sport,
+      pricePerHour,
+      location,
+      description,
+      images,
+    } = body;
+
+    if (!name || !sport || !pricePerHour) {
       return NextResponse.json(
-        { error: "Name, sport and price are required" },
-        { status: 400 },
+        {
+          error: "name, sport and pricePerHour are required",
+        },
+        { status: 400 }
       );
     }
+
+    const today = new Date();
+
+    const slotTemplates = [
+      { start: 6, end: 7 },
+      { start: 7, end: 8 },
+      { start: 8, end: 9 },
+      { start: 9, end: 10 },
+      { start: 10, end: 11 },
+      { start: 11, end: 12 },
+      { start: 12, end: 13 },
+      { start: 13, end: 14 },
+      { start: 14, end: 15 },
+      { start: 15, end: 16 },
+      { start: 16, end: 17 },
+      { start: 17, end: 18 },
+      { start: 18, end: 19 },
+      { start: 19, end: 20 },
+      { start: 20, end: 21 },
+    ];
+
+    const slots = slotTemplates.map((slot) => {
+      const startTime = new Date(today);
+      startTime.setHours(slot.start, 0, 0, 0);
+
+      const endTime = new Date(today);
+      endTime.setHours(slot.end, 0, 0, 0);
+
+      return {
+        startTime,
+        endTime,
+      };
+    });
 
     const venue = await prisma.venue.create({
       data: {
         name,
         sport,
-        price: Number(price), // ensure number
+        pricePerHour: Number(pricePerHour),
         location: location || null,
-        images: images && images.length > 0 ? images : [], // avoid crash
+        description: description || null,
+        images: images || [],
         ownerId: user.id,
         approved: false,
+
         slots: {
-          create: [
-            { time: "6:00 AM" },
-            { time: "7:00 AM" },
-            { time: "8:00 AM" },
-            { time: "9:00 AM" },
-            { time: "10:00 AM" },
-            { time: "11:00 AM" },
-            { time: "12:00 PM" },
-            { time: "1:00 PM" },
-            { time: "2:00 PM" },
-            { time: "3:00 PM" },
-            { time: "4:00 PM" },
-            { time: "5:00 PM" },
-            { time: "6:00 PM" },
-            { time: "7:00 PM" },
-            { time: "8:00 PM" },
-          ],
+          create: slots,
         },
+      },
+
+      include: {
+        slots: true,
+        owner: true,
       },
     });
 
@@ -57,8 +89,10 @@ export async function POST(req: Request) {
     console.error("CREATE VENUE ERROR:", error);
 
     return NextResponse.json(
-      { error: error.message || "Failed to create venue" },
-      { status: 500 },
+      {
+        error: error.message || "Failed to create venue",
+      },
+      { status: 500 }
     );
   }
 }
@@ -69,16 +103,54 @@ export async function GET() {
       where: {
         approved: true,
       },
+
       include: {
-        owner: true,
-        slots: true,
+        owner: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            profileImage: true,
+          },
+        },
+
+        slots: {
+          where: {
+            isActive: true,
+          },
+
+          orderBy: {
+            startTime: "asc",
+          },
+        },
+
+        matches: {
+          include: {
+            creator: {
+              select: {
+                id: true,
+                name: true,
+                profileImage: true,
+              },
+            },
+          },
+        },
+      },
+
+      orderBy: {
+        createdAt: "desc",
       },
     });
-    console.log("VENUES:", venues);
+
     return NextResponse.json(venues);
   } catch (error: any) {
-    console.error("VENUES ERROR FULL:", error);
+    console.error("VENUES ERROR:", error);
 
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: error.message || "Failed to fetch venues",
+      },
+      { status: 500 }
+    );
   }
 }

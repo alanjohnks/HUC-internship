@@ -13,19 +13,94 @@ export async function GET(req: Request) {
       where: {
         ownerId: user.id,
       },
+
       include: {
-        slots: true, 
+        slots: {
+          where: {
+            isActive: true,
+          },
+
+          orderBy: {
+            startTime: "asc",
+          },
+
+          include: {
+            matches: {
+              include: {
+                creator: {
+                  select: {
+                    id: true,
+                    name: true,
+                    profileImage: true,
+                  },
+                },
+
+                participants: {
+                  include: {
+                    user: {
+                      select: {
+                        id: true,
+                        name: true,
+                        profileImage: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+
+        matches: {
+          include: {
+            creator: {
+              select: {
+                id: true,
+                name: true,
+                profileImage: true,
+              },
+            },
+
+            participants: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    profileImage: true,
+                  },
+                },
+              },
+            },
+          },
+
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
+
+        _count: {
+          select: {
+            matches: true,
+            slots: true,
+          },
+        },
       },
+
       orderBy: {
-        id: "desc", 
+        createdAt: "desc",
       },
     });
 
     return NextResponse.json(venues);
-  } catch (err: any) {
+  } catch (error: any) {
+    console.error("OWNER VENUES ERROR:", error);
+
     return NextResponse.json(
-      { error: err.message },
-      { status: 403 }
+      {
+        error: error.message || "Failed to fetch venues",
+      },
+      { status: 500 }
     );
   }
 }
