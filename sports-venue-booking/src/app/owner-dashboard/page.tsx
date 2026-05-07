@@ -12,24 +12,18 @@ import OwnerBookings from "../components/OwnerBookings";
 export default function OwnerDashboard() {
   const router = useRouter();
 
-  const [active, setActive] =
-    useState("dashboard");
+  const [active, setActive] = useState("dashboard");
 
-  const [venues, setVenues] =
-    useState<any[]>([]);
+  const [venues, setVenues] = useState<any[]>([]);
 
-  const [bookings, setBookings] =
-    useState<any[]>([]);
+  const [bookings, setBookings] = useState<any[]>([]);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const [user, setUser] =
-    useState<any>(null);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    const storedUser =
-      localStorage.getItem("user");
+    const storedUser = localStorage.getItem("user");
 
     if (storedUser) {
       setUser(JSON.parse(storedUser));
@@ -37,32 +31,25 @@ export default function OwnerDashboard() {
 
     const fetchData = async () => {
       try {
-        const token =
-          localStorage.getItem("token");
+        const token = localStorage.getItem("token");
 
-        const [vRes, bRes] =
-          await Promise.all([
-            fetch("/api/owners/venue", {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }),
+        const [vRes, bRes] = await Promise.all([
+          fetch("/api/owners/venue", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
 
-            fetch(
-              "/api/owners/bookings",
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              }
-            ),
-          ]);
+          fetch("/api/owners/bookings", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+        ]);
 
-        const vData =
-          await vRes.json();
+        const vData = await vRes.json();
 
-        const bData =
-          await bRes.json();
+        const bData = await bRes.json();
 
         setVenues(vData || []);
 
@@ -87,10 +74,7 @@ export default function OwnerDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
-      <OwnerSidebar
-        active={active}
-        setActive={setActive}
-      />
+      <OwnerSidebar active={active} setActive={setActive} />
 
       <main className="ml-64 p-8 space-y-8">
         <div className="flex items-center justify-between">
@@ -100,8 +84,7 @@ export default function OwnerDashboard() {
             </h1>
 
             <p className="text-gray-500 mt-1">
-              Manage venues, matches and
-              bookings
+              Manage venues, matches and bookings
             </p>
           </div>
 
@@ -112,13 +95,9 @@ export default function OwnerDashboard() {
               </div>
 
               <div>
-                <p className="font-semibold text-gray-800">
-                  {user?.name}
-                </p>
+                <p className="font-semibold text-gray-800">{user?.name}</p>
 
-                <p className="text-xs text-gray-500">
-                  Venue Owner
-                </p>
+                <p className="text-xs text-gray-500">Venue Owner</p>
               </div>
             </div>
 
@@ -144,57 +123,36 @@ export default function OwnerDashboard() {
               <>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="bg-white p-5 rounded-2xl shadow border border-gray-100">
-                    <p className="text-sm text-gray-400">
-                      Total Venues
-                    </p>
+                    <p className="text-sm text-gray-400">Total Venues</p>
 
-                    <p className="text-3xl font-bold mt-2">
-                      {venues.length}
-                    </p>
+                    <p className="text-3xl font-bold mt-2">{venues.length}</p>
                   </div>
 
                   <div className="bg-white p-5 rounded-2xl shadow border border-gray-100">
-                    <p className="text-sm text-gray-400">
-                      Total Bookings
-                    </p>
+                    <p className="text-sm text-gray-400">Total Bookings</p>
 
-                    <p className="text-3xl font-bold mt-2">
-                      {bookings.length}
-                    </p>
+                    <p className="text-3xl font-bold mt-2">{bookings.length}</p>
                   </div>
 
                   <div className="bg-white p-5 rounded-2xl shadow border border-gray-100">
-                    <p className="text-sm text-gray-400">
-                      Revenue
-                    </p>
+                    <p className="text-sm text-gray-400">Revenue</p>
 
                     <p className="text-3xl font-bold text-green-600 mt-2">
                       ₹
-                      {bookings.reduce(
-                        (
-                          sum: number,
-                          b: any
-                        ) =>
-                          sum +
-                          (b.slot?.venue
-                            ?.price || 0),
-                        0
-                      )}
+                      {bookings
+                        .reduce(
+                          (sum: number, b: any) => sum + (b.amountPaid || 0),
+                          0,
+                        )
+                        .toFixed(2)}
                     </p>
                   </div>
 
                   <div className="bg-white p-5 rounded-2xl shadow border border-gray-100">
-                    <p className="text-sm text-gray-400">
-                      Active Venues
-                    </p>
+                    <p className="text-sm text-gray-400">Active Venues</p>
 
                     <p className="text-3xl font-bold mt-2">
-                      {
-                        venues.filter(
-                          (v: any) =>
-                            v.approved
-                        ).length
-                      }
+                      {venues.filter((v: any) => v.approved).length}
                     </p>
                   </div>
                 </div>
@@ -206,15 +164,12 @@ export default function OwnerDashboard() {
                     </h3>
 
                     <p className="text-sm text-gray-500 mt-1">
-                      Start hosting public
-                      and private matches
+                      Start hosting public and private matches
                     </p>
                   </div>
 
                   <button
-                    onClick={() =>
-                      setActive("add")
-                    }
+                    onClick={() => setActive("add")}
                     className="bg-orange-500 text-white px-6 py-3 rounded-xl hover:bg-orange-600 transition"
                   >
                     Add Venue
@@ -222,54 +177,38 @@ export default function OwnerDashboard() {
                 </div>
 
                 <div>
-                  <h2 className="text-2xl font-bold mb-4">
-                    Recent Bookings
-                  </h2>
+                  <h2 className="text-2xl font-bold mb-4">Recent Bookings</h2>
 
-                  {bookings.length ===
-                  0 ? (
-                    <p className="text-gray-500">
-                      No bookings yet
-                    </p>
+                  {bookings.length === 0 ? (
+                    <p className="text-gray-500">No bookings yet</p>
                   ) : (
                     <div className="space-y-4">
-                      {bookings
-                        .slice(0, 3)
-                        .map((b: any) => (
-                          <div
-                            key={b.id}
-                            className="bg-white p-5 rounded-2xl shadow border border-gray-100 flex justify-between"
-                          >
-                            <div>
-                              <p className="font-semibold text-gray-800">
-                                {
-                                  b.slot?.venue
-                                    ?.name
-                                }
-                              </p>
+                      {bookings.slice(0, 3).map((b: any) => (
+                        <div
+                          key={b.id}
+                          className="bg-white p-5 rounded-2xl shadow border border-gray-100 flex justify-between"
+                        >
+                          <div>
+                            <p className="font-semibold text-gray-800">
+                              {b.slot?.venue?.name}
+                            </p>
 
-                              <p className="text-sm text-gray-500 mt-1">
-                                {
-                                  b.user
-                                    ?.email
-                                }
-                              </p>
-                            </div>
-
-                            <div className="text-right">
-                              <p className="text-sm text-gray-700">
-                                {
-                                  b.slot
-                                    ?.time
-                                }
-                              </p>
-
-                              <span className="inline-block mt-2 text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full">
-                                Confirmed
-                              </span>
-                            </div>
+                            <p className="text-sm text-gray-500 mt-1">
+                              {b.user?.email}
+                            </p>
                           </div>
-                        ))}
+
+                          <div className="text-right">
+                            <p className="text-sm text-gray-700">
+                              {b.slot?.time}
+                            </p>
+
+                            <span className="inline-block mt-2 text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full">
+                              Confirmed
+                            </span>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -278,17 +217,11 @@ export default function OwnerDashboard() {
           </section>
         )}
 
-        {active === "add" && (
-          <AddVenue />
-        )}
+        {active === "add" && <AddVenue />}
 
-        {active === "venues" && (
-          <MyVenues />
-        )}
+        {active === "venues" && <MyVenues />}
 
-        {active === "bookings" && (
-          <OwnerBookings />
-        )}
+        {active === "bookings" && <OwnerBookings />}
       </main>
     </div>
   );
