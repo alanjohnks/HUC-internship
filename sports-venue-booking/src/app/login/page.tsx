@@ -108,18 +108,6 @@ export default function LoginPage() {
               />
             </div>
 
-            {/* Remember */}
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={remember}
-                onChange={(e) => setRemember(e.target.checked)}
-              />
-              <span className="text-sm text-gray-600">
-                Remember this device
-              </span>
-            </div>
-
             {/* Button */}
             <button
               type="submit"
@@ -127,6 +115,18 @@ export default function LoginPage() {
             >
               Login →
             </button>
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-600">
+                Don&apos;t have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => router.push("/signup")}
+                  className="text-orange-500 font-semibold hover:text-orange-600"
+                >
+                  Create Account
+                </button>
+              </p>
+            </div>
           </form>
         </section>
       </div>

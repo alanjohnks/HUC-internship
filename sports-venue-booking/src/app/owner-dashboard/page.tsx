@@ -1,37 +1,71 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
+import { useRouter } from "next/navigation";
+
 import OwnerSidebar from "../components/OwnerSidebar";
 import AddVenue from "../components/AddVenue";
 import MyVenues from "../components/MyVenues";
 import OwnerBookings from "../components/OwnerBookings";
 
 export default function OwnerDashboard() {
-  const [active, setActive] = useState("dashboard");
+  const router = useRouter();
 
-  const [venues, setVenues] = useState<any[]>([]);
-  const [bookings, setBookings] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [active, setActive] =
+    useState("dashboard");
 
-  // 🔥 Fetch Owner Data
+  const [venues, setVenues] =
+    useState<any[]>([]);
+
+  const [bookings, setBookings] =
+    useState<any[]>([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [user, setUser] =
+    useState<any>(null);
+
   useEffect(() => {
+    const storedUser =
+      localStorage.getItem("user");
+
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token =
+          localStorage.getItem("token");
 
-        const [vRes, bRes] = await Promise.all([
-          fetch("/api/owners/venue", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          fetch("/api/owners/bookings", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-        ]);
+        const [vRes, bRes] =
+          await Promise.all([
+            fetch("/api/owners/venue", {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }),
 
-        const vData = await vRes.json();
-        const bData = await bRes.json();
+            fetch(
+              "/api/owners/bookings",
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            ),
+          ]);
+
+        const vData =
+          await vRes.json();
+
+        const bData =
+          await bRes.json();
 
         setVenues(vData || []);
+
         setBookings(bData || []);
       } catch (err) {
         console.error(err);
@@ -43,21 +77,62 @@ export default function OwnerDashboard() {
     fetchData();
   }, []);
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+
+    localStorage.removeItem("user");
+
+    router.push("/login");
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
-      <OwnerSidebar active={active} setActive={setActive} />
+      <OwnerSidebar
+        active={active}
+        setActive={setActive}
+      />
 
       <main className="ml-64 p-8 space-y-8">
-        
-        {/* 🔷 DASHBOARD */}
-        {active === "dashboard" && (
-          <section className="space-y-6">
-            
-            <h1 className="text-3xl font-bold">
-              Welcome back 👋
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800">
+              Owner Dashboard
             </h1>
 
-            {/* 🔥 Loading */}
+            <p className="text-gray-500 mt-1">
+              Manage venues, matches and
+              bookings
+            </p>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 bg-white px-4 py-3 rounded-2xl border border-gray-100 shadow-sm">
+              <div className="w-11 h-11 rounded-full bg-orange-500 text-white flex items-center justify-center font-bold text-lg">
+                {user?.name?.charAt(0)}
+              </div>
+
+              <div>
+                <p className="font-semibold text-gray-800">
+                  {user?.name}
+                </p>
+
+                <p className="text-xs text-gray-500">
+                  Venue Owner
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={handleLogout}
+              className="bg-red-500 text-white px-5 py-3 rounded-xl hover:bg-red-600 transition font-medium"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+
+        {active === "dashboard" && (
+          <section className="space-y-6">
             {loading ? (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="h-24 bg-gray-200 animate-pulse rounded-xl" />
@@ -67,126 +142,134 @@ export default function OwnerDashboard() {
               </div>
             ) : (
               <>
-                {/* 🔷 Stats */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  
-                  <div className="bg-white p-4 rounded-xl shadow border">
-                    <p className="text-sm text-gray-400">Total Venues</p>
-                    <p className="text-2xl font-bold">{venues.length}</p>
+                  <div className="bg-white p-5 rounded-2xl shadow border border-gray-100">
+                    <p className="text-sm text-gray-400">
+                      Total Venues
+                    </p>
+
+                    <p className="text-3xl font-bold mt-2">
+                      {venues.length}
+                    </p>
                   </div>
 
-                  <div className="bg-white p-4 rounded-xl shadow border">
-                    <p className="text-sm text-gray-400">Total Bookings</p>
-                    <p className="text-2xl font-bold">{bookings.length}</p>
+                  <div className="bg-white p-5 rounded-2xl shadow border border-gray-100">
+                    <p className="text-sm text-gray-400">
+                      Total Bookings
+                    </p>
+
+                    <p className="text-3xl font-bold mt-2">
+                      {bookings.length}
+                    </p>
                   </div>
 
-                  <div className="bg-white p-4 rounded-xl shadow border">
-                    <p className="text-sm text-gray-400">Revenue</p>
-                    <p className="text-2xl font-bold text-green-600">
+                  <div className="bg-white p-5 rounded-2xl shadow border border-gray-100">
+                    <p className="text-sm text-gray-400">
+                      Revenue
+                    </p>
+
+                    <p className="text-3xl font-bold text-green-600 mt-2">
                       ₹
                       {bookings.reduce(
-                        (sum: number, b: any) =>
-                          sum + (b.slot?.venue?.price || 0),
+                        (
+                          sum: number,
+                          b: any
+                        ) =>
+                          sum +
+                          (b.slot?.venue
+                            ?.price || 0),
                         0
                       )}
                     </p>
                   </div>
 
-                  <div className="bg-white p-4 rounded-xl shadow border">
-                    <p className="text-sm text-gray-400">Active Venues</p>
-                    <p className="text-2xl font-bold">
-                      {venues.filter((v: any) => v.approved).length}
+                  <div className="bg-white p-5 rounded-2xl shadow border border-gray-100">
+                    <p className="text-sm text-gray-400">
+                      Active Venues
+                    </p>
+
+                    <p className="text-3xl font-bold mt-2">
+                      {
+                        venues.filter(
+                          (v: any) =>
+                            v.approved
+                        ).length
+                      }
                     </p>
                   </div>
                 </div>
 
-                {/* 🔥 Quick Action */}
-                <div className="bg-white p-6 rounded-xl shadow border flex justify-between items-center">
+                <div className="bg-white p-6 rounded-2xl shadow border border-gray-100 flex items-center justify-between">
                   <div>
-                    <h3 className="text-lg font-semibold">
+                    <h3 className="text-xl font-semibold text-gray-800">
                       Add a new venue
                     </h3>
-                    <p className="text-sm text-gray-500">
-                      Start earning by listing your venue
+
+                    <p className="text-sm text-gray-500 mt-1">
+                      Start hosting public
+                      and private matches
                     </p>
                   </div>
 
                   <button
-                    onClick={() => setActive("add")}
-                    className="bg-orange-500 text-white px-5 py-2 rounded-lg hover:bg-orange-600"
+                    onClick={() =>
+                      setActive("add")
+                    }
+                    className="bg-orange-500 text-white px-6 py-3 rounded-xl hover:bg-orange-600 transition"
                   >
                     Add Venue
                   </button>
                 </div>
 
-                {/* 🔷 Recent Bookings */}
                 <div>
-                  <h2 className="text-xl font-semibold mb-3">
+                  <h2 className="text-2xl font-bold mb-4">
                     Recent Bookings
                   </h2>
 
-                  {bookings.length === 0 ? (
+                  {bookings.length ===
+                  0 ? (
                     <p className="text-gray-500">
                       No bookings yet
                     </p>
                   ) : (
-                    <div className="space-y-3">
-                      {bookings.slice(0, 3).map((b: any) => (
-                        <div
-                          key={b.id}
-                          className="bg-white p-4 rounded-xl shadow border flex justify-between"
-                        >
-                          <div>
-                            <p className="font-semibold">
-                              {b.slot?.venue?.name}
-                            </p>
-                            <p className="text-sm text-gray-500">
-                              {b.user?.email}
-                            </p>
+                    <div className="space-y-4">
+                      {bookings
+                        .slice(0, 3)
+                        .map((b: any) => (
+                          <div
+                            key={b.id}
+                            className="bg-white p-5 rounded-2xl shadow border border-gray-100 flex justify-between"
+                          >
+                            <div>
+                              <p className="font-semibold text-gray-800">
+                                {
+                                  b.slot?.venue
+                                    ?.name
+                                }
+                              </p>
+
+                              <p className="text-sm text-gray-500 mt-1">
+                                {
+                                  b.user
+                                    ?.email
+                                }
+                              </p>
+                            </div>
+
+                            <div className="text-right">
+                              <p className="text-sm text-gray-700">
+                                {
+                                  b.slot
+                                    ?.time
+                                }
+                              </p>
+
+                              <span className="inline-block mt-2 text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full">
+                                Confirmed
+                              </span>
+                            </div>
                           </div>
-
-                          <div className="text-right">
-                            <p className="text-sm">
-                              {b.slot?.time}
-                            </p>
-                            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
-                              Confirmed
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* 🔷 Venue Preview */}
-                <div>
-                  <h2 className="text-xl font-semibold mb-3">
-                    My Venues
-                  </h2>
-
-                  {venues.length === 0 ? (
-                    <p className="text-gray-500">
-                      No venues yet
-                    </p>
-                  ) : (
-                    <div className="grid md:grid-cols-3 gap-4">
-                      {venues.slice(0, 3).map((v: any) => (
-                        <div
-                          key={v.id}
-                          className="bg-white p-4 rounded-xl shadow border"
-                        >
-                          <p className="font-semibold">
-                            {v.name}
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            {v.location}
-                          </p>
-                          <p className="text-orange-600 font-bold">
-                            ₹{v.price}
-                          </p>
-                        </div>
-                      ))}
+                        ))}
                     </div>
                   )}
                 </div>
@@ -195,14 +278,17 @@ export default function OwnerDashboard() {
           </section>
         )}
 
-        {/* 🔷 ADD VENUE */}
-        {active === "add" && <AddVenue />}
+        {active === "add" && (
+          <AddVenue />
+        )}
 
-        {/* 🔷 MY VENUES */}
-        {active === "venues" && <MyVenues />}
+        {active === "venues" && (
+          <MyVenues />
+        )}
 
-        {/* 🔷 BOOKINGS */}
-        {active === "bookings" && <OwnerBookings />}
+        {active === "bookings" && (
+          <OwnerBookings />
+        )}
       </main>
     </div>
   );
