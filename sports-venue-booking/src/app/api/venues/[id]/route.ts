@@ -1,67 +1,31 @@
 import { getUserFromRequest } from "@/lib/getUser";
+
 import { prisma } from "@/lib/prisma";
+
 import { requireRole } from "@/lib/requireRole";
+
 import { NextResponse } from "next/server";
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  context: {
+    params: Promise<{ id: string }>;
+  }
 ) {
   try {
-    const venue = await prisma.venue.findUnique({
-      where: {
-        id: params.id,
-      },
+    const { id } =
+      await context.params;
 
-      include: {
-        owner: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            profileImage: true,
-          },
-        },
+    const venue =
+      await prisma.venue.findUnique(
+        {
+          where: { id },
 
-        slots: {
-          where: {
-            isActive: true,
-          },
-
-          orderBy: {
-            startTime: "asc",
-          },
-        },
-
-        matches: {
           include: {
-            creator: {
-              select: {
-                id: true,
-                name: true,
-                profileImage: true,
-              },
-            },
-
-            participants: {
-              include: {
-                user: {
-                  select: {
-                    id: true,
-                    name: true,
-                    profileImage: true,
-                  },
-                },
-              },
-            },
+            slots: true,
           },
-
-          orderBy: {
-            createdAt: "desc",
-          },
-        },
-      },
-    });
+        }
+      );
 
     if (!venue) {
       return NextResponse.json(
@@ -72,11 +36,13 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(venue);
+    return NextResponse.json(
+      venue
+    );
   } catch (error: any) {
     return NextResponse.json(
       {
-        error: error.message || "Failed to fetch venue",
+        error: error.message,
       },
       { status: 500 }
     );
@@ -85,80 +51,94 @@ export async function GET(
 
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  context: {
+    params: Promise<{ id: string }>;
+  }
 ) {
   try {
-    const user = getUserFromRequest(req);
+    const { id } =
+      await context.params;
 
-    await requireRole(user.id, "OWNER");
+    const authUser =
+      getUserFromRequest(req);
 
-    const venue = await prisma.venue.findUnique({
-      where: {
-        id: params.id,
-      },
-    });
+    await requireRole(
+      authUser.id,
+      "OWNER"
+    );
 
-    if (!venue) {
+    const body =
+      await req.json();
+
+    const {
+      name,
+      sport,
+      price,
+      location,
+    } = body;
+
+    const existingVenue =
+      await prisma.venue.findUnique(
+        {
+          where: { id },
+        }
+      );
+
+    if (!existingVenue) {
       return NextResponse.json(
         {
-          error: "Venue not found",
+          error:
+            "Venue not found",
         },
         { status: 404 }
       );
     }
 
-    if (venue.ownerId !== user.id) {
+    if (
+      existingVenue.ownerId !==
+      authUser.id
+    ) {
       return NextResponse.json(
         {
-          error: "Unauthorized",
+          error:
+            "Unauthorized",
         },
         { status: 403 }
       );
     }
 
-    const body = await req.json();
+    const updatedVenue =
+      await prisma.venue.update({
+        where: { id },
 
-    const {
-      name,
-      sport,
-      location,
-      description,
-      pricePerHour,
-      images,
-      approved,
-    } = body;
+        data: {
+          name,
+          sport,
+          location,
 
-    const updatedVenue = await prisma.venue.update({
-      where: {
-        id: params.id,
-      },
+          pricePerHour:
+            Number(price),
+        },
 
-      data: {
-        ...(name && { name }),
-        ...(sport && { sport }),
-        ...(location !== undefined && { location }),
-        ...(description !== undefined && { description }),
-        ...(pricePerHour && {
-          pricePerHour: Number(pricePerHour),
-        }),
-        ...(images && { images }),
+        include: {
+          slots: true,
+        },
+      });
 
-        ...(approved !== undefined && {
-          approved,
-        }),
-      },
-
-      include: {
-        owner: true,
-        slots: true,
-      },
-    });
-
-    return NextResponse.json(updatedVenue);
+    return NextResponse.json(
+      updatedVenue
+    );
   } catch (error: any) {
+    console.error(
+      "UPDATE VENUE ERROR:",
+      error
+    );
+
     return NextResponse.json(
       {
-        error: error.message || "Failed to update venue",
+        error:
+          error.message ||
+          "Failed to update venue",
       },
       { status: 500 }
     );
@@ -167,32 +147,47 @@ export async function PUT(
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  context: {
+    params: Promise<{ id: string }>;
+  }
 ) {
   try {
-    const user = getUserFromRequest(req);
+    const { id } =
+      await context.params;
 
-    await requireRole(user.id, "OWNER");
+    const authUser =
+      getUserFromRequest(req);
 
-    const venue = await prisma.venue.findUnique({
-      where: {
-        id: params.id,
-      },
-    });
+    await requireRole(
+      authUser.id,
+      "OWNER"
+    );
+
+    const venue =
+      await prisma.venue.findUnique(
+        {
+          where: { id },
+        }
+      );
 
     if (!venue) {
       return NextResponse.json(
         {
-          error: "Venue not found",
+          error:
+            "Venue not found",
         },
         { status: 404 }
       );
     }
 
-    if (venue.ownerId !== user.id) {
+    if (
+      venue.ownerId !==
+      authUser.id
+    ) {
       return NextResponse.json(
         {
-          error: "Unauthorized",
+          error:
+            "Unauthorized",
         },
         { status: 403 }
       );
@@ -200,30 +195,34 @@ export async function DELETE(
 
     await prisma.match.deleteMany({
       where: {
-        venueId: params.id,
+        venueId: id,
       },
     });
 
     await prisma.slot.deleteMany({
       where: {
-        venueId: params.id,
+        venueId: id,
       },
     });
 
     await prisma.venue.delete({
-      where: {
-        id: params.id,
-      },
+      where: { id },
     });
 
     return NextResponse.json({
       success: true,
-      message: "Venue deleted successfully",
     });
   } catch (error: any) {
+    console.error(
+      "DELETE VENUE ERROR:",
+      error
+    );
+
     return NextResponse.json(
       {
-        error: error.message || "Failed to delete venue",
+        error:
+          error.message ||
+          "Failed to delete venue",
       },
       { status: 500 }
     );
