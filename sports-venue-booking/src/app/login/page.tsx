@@ -61,7 +61,7 @@ export default function LoginPage() {
         >
           <div>
             <h2 className="text-3xl font-extrabold italic tracking-tight text-orange-400">
-              PRECISION
+              Pro Arena Elite
             </h2>
             <p className="mt-2 text-lg opacity-80 max-w-xs">
               Elevate your venue management to elite performance levels.

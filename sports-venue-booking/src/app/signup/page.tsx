@@ -55,7 +55,7 @@ export default function SignupPage() {
 
         <div className="relative z-10 w-full flex flex-col justify-between p-16 text-white">
           <h1 className="text-4xl font-black italic text-orange-400">
-            PRECISION
+            Pro Arena Elite
           </h1>
 
           <div>

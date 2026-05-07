@@ -2,7 +2,7 @@ export default function Navbar() {
   return (
     <nav className="bg-[#f7f9fb]/80 backdrop-blur-xl sticky top-0 z-50 shadow-[0_32px_64px_-15px_rgba(25,28,30,0.06)]">
       <div className="flex justify-between items-center w-full px-8 py-4 max-w-[1440px] mx-auto">
-        <div className="text-2xl font-black italic text-[#ff6b00]">PRECISION</div>
+        <div className="text-2xl font-black italic text-[#ff6b00]">Pro Arena Elite</div>
 
         <div className="hidden md:flex items-center gap-8">
           <a className="text-[#ff6b00] border-b-4 border-[#ff6b00] pb-1 font-bold text-sm">Venues</a>
