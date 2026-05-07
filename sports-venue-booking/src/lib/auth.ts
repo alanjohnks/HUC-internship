@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { JwtPayload } from "jsonwebtoken";
+import { NextRequest } from "next/server";
 
 export interface TokenPayload {
   id: string;
@@ -27,4 +28,17 @@ export function verifyToken(token: string): TokenPayload {
     id: decoded.id as string,
     role: decoded.role as string,
   };
+}
+export async function getAuthUser(req: NextRequest) {
+  const authHeader = req.headers.get("authorization");
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    throw new Error("Unauthorized");
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  const user = verifyToken(token);
+
+  return user;
 }

@@ -5,61 +5,102 @@ import { signToken } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {
-    const { email, password } = await req.json();
+    const body = await req.json();
 
-    // 🔍 Check if user exists
+    const { email, password } = body;
+
+    if (!email || !password) {
+      return NextResponse.json(
+        {
+          error: "Email and password are required",
+        },
+        { status: 400 }
+      );
+    }
+
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: {
+        email,
+      },
+
+      include: {
+        _count: {
+          select: {
+            followers: true,
+            following: true,
+            createdMatches: true,
+          },
+        },
+      },
     });
 
     if (!user) {
       return NextResponse.json(
-        { error: "User not found" },
+        {
+          error: "User not found",
+        },
         { status: 400 }
       );
     }
 
-    // 🔐 Compare password
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(
+      password,
+      user.password
+    );
 
     if (!isMatch) {
       return NextResponse.json(
-        { error: "Invalid credentials" },
+        {
+          error: "Invalid credentials",
+        },
         { status: 400 }
       );
     }
 
-    // 🪪 Generate JWT token
     const token = signToken(user);
 
-    // ✅ Create response
     const response = NextResponse.json({
       message: "Login successful",
-      token:token,
+
+      token,
+
       user: {
         id: user.id,
         name: user.name,
         email: user.email,
         role: user.role,
+
+        bio: user.bio,
+        profileImage: user.profileImage,
+
+        followersCount: user._count.followers,
+        followingCount: user._count.following,
+        matchesCreated: user._count.createdMatches,
+
+        createdAt: user.createdAt,
       },
     });
 
-    // 🍪 Set HTTP-only cookie
     response.cookies.set("token", token, {
       httpOnly: true,
-      secure: false, // ⚠️ change to true in production (HTTPS)
+
+      secure: process.env.NODE_ENV === "production",
+
       sameSite: "lax",
+
       path: "/",
-      maxAge: 60 * 60 * 24, // 1 day
+
+      maxAge: 60 * 60 * 24 * 7,
     });
 
     return response;
-
   } catch (error: any) {
     console.error("LOGIN API ERROR:", error);
 
     return NextResponse.json(
-      { error: "Internal server error" },
+      {
+        error: error.message || "Internal server error",
+      },
       { status: 500 }
     );
   }
