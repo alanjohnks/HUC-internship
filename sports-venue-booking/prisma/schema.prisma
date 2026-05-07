@@ -7,55 +7,235 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  USER
+  OWNER
+  ADMIN
+}
+
+enum MatchVisibility {
+  PRIVATE
+  PUBLIC
+}
+
+enum MatchStatus {
+  OPEN
+  FULL
+  COMPLETED
+  CANCELLED
+}
+
+enum NotificationType {
+  FOLLOW
+  MATCH_CREATED
+  MATCH_JOINED
+  MATCH_CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
 model User {
   id       String @id @default(auto()) @map("_id") @db.ObjectId
   name     String
   email    String @unique
   password String
-  role     String
 
-  venues   Venue[] // owner relation
-  bookings Booking[]
+  role Role @default(USER)
+
+  profileImage String?
+  bio          String?
+
+  venues Venue[]
+
+  following Follow[] @relation("Following")
+  followers Follow[] @relation("Followers")
+
+  createdMatches Match[] @relation("MatchCreator")
+
+  participatedMatches MatchParticipant[]
+
+  messages Message[]
+
+  notificationsReceived Notification[] @relation("NotificationReceiver")
+
+  notificationsSent Notification[] @relation("NotificationSender")
+
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+}
+
+model Follow {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  followerId  String @db.ObjectId
+  followingId String @db.ObjectId
+
+  follower User @relation("Following", fields: [followerId], references: [id])
+
+  following User @relation("Followers", fields: [followingId], references: [id])
+
+  createdAt DateTime? @default(now())
+
+  @@unique([followerId, followingId])
 }
 
 model Venue {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  name     String
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  name        String
+  description String?
+
   location String?
   sport    String?
-  price    Float?
-  images   String[]
+
+  pricePerHour Float?
+
+  images String[]
+
+  approved Boolean @default(false)
 
   ownerId String @db.ObjectId
-  approved Boolean @default(false)
-  owner   User   @relation(fields: [ownerId], references: [id])
+
+  owner User @relation(fields: [ownerId], references: [id])
 
   slots Slot[]
+
+  matches Match[]
+
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
 }
 
 model Slot {
-  id       String  @id @default(auto()) @map("_id") @db.ObjectId
-  time     String
-  isBooked Boolean @default(false)
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  startTime DateTime?
+  endTime   DateTime?
+
+  isActive Boolean @default(true)
 
   venueId String @db.ObjectId
-  venue   Venue  @relation(fields: [venueId], references: [id])
 
-  bookings Booking[] // ONE SLOT → MANY BOOKINGS
+  venue Venue @relation(fields: [venueId], references: [id])
+
+  matches Match[]
+
+  createdAt DateTime? @default(now())
 }
 
-model Booking {
+model Match {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  title       String?
+  description String?
+
+  sport String?
+
+  visibility MatchVisibility
+
+  status MatchStatus @default(OPEN)
+
+  maxPlayers Int
+
+  currentPlayers Int @default(1)
+
+  totalPrice Float
+
+  splitPrice Float
+
+  creatorId String @db.ObjectId
+
+  creator User @relation("MatchCreator", fields: [creatorId], references: [id])
+
+  venueId String @db.ObjectId
+
+  venue Venue @relation(fields: [venueId], references: [id])
+
+  slotId String @db.ObjectId
+
+  slot Slot @relation(fields: [slotId], references: [id])
+
+  participants MatchParticipant[]
+
+  chatRoom ChatRoom?
+
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+}
+
+model MatchParticipant {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
   userId String @db.ObjectId
-  slotId String @db.ObjectId
 
   user User @relation(fields: [userId], references: [id])
-  slot Slot @relation(fields: [slotId], references: [id])
+
+  matchId String @db.ObjectId
+
+  match Match @relation(fields: [matchId], references: [id])
+
+  paymentStatus PaymentStatus @default(PENDING)
+
+  amountPaid Float?
+
+  isOrganizer Boolean @default(false)
+
+  joinedAt DateTime? @default(now())
+
+  @@unique([userId, matchId])
 }
 
-enum Role {
-  USER
-  OWNER
-  ADMIN
+model ChatRoom {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  matchId String @unique @db.ObjectId
+
+  match Match @relation(fields: [matchId], references: [id])
+
+  messages Message[]
+
+  createdAt DateTime? @default(now())
+}
+
+model Message {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  content String
+
+  senderId String @db.ObjectId
+
+  sender User @relation(fields: [senderId], references: [id])
+
+  chatRoomId String @db.ObjectId
+
+  chatRoom ChatRoom @relation(fields: [chatRoomId], references: [id])
+
+  createdAt DateTime? @default(now())
+}
+
+model Notification {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  type NotificationType
+
+  title   String
+  message String
+
+  senderId   String? @db.ObjectId
+  receiverId String  @db.ObjectId
+
+  sender User? @relation("NotificationSender", fields: [senderId], references: [id])
+
+  receiver User @relation("NotificationReceiver", fields: [receiverId], references: [id])
+
+  matchId String? @db.ObjectId
+
+  isRead Boolean @default(false)
+
+  createdAt DateTime? @default(now())
 }
