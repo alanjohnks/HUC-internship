@@ -27,10 +27,34 @@ export default function ChatWindow({
     useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (selectedChat?.messages) {
-      setMessages(selectedChat.messages);
+  if (!selectedChat?.matchId) return;
+
+  const interval = setInterval(async () => {
+    try {
+      const token =
+        localStorage.getItem("token");
+
+      const res = await fetch(
+        `/api/chat/${selectedChat.matchId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setMessages(data.messages || []);
+      }
+    } catch (error) {
+      console.error(error);
     }
-  }, [selectedChat]);
+  }, 2000);
+
+  return () => clearInterval(interval);
+}, [selectedChat]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
