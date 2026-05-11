@@ -6,7 +6,9 @@ import { useState } from "react";
 export default function VenueCard({
   venue,
 }: any) {
-  const [slots] = useState(venue.slots || []);
+  const [slots] = useState(
+    venue.slots || []
+  );
 
   const [loadingId, setLoadingId] =
     useState<string | null>(null);
@@ -41,11 +43,17 @@ export default function VenueCard({
 
       if (!slot) return;
 
+      if (slot.isBooked) {
+        alert("Slot already booked");
+        return;
+      }
+
       const totalPrice =
         venue.pricePerHour || 0;
 
       const res = await createMatch({
         title: `${venue.sport} Match`,
+
         description: `${visibility} game at ${venue.name}`,
 
         sport: venue.sport,
@@ -314,44 +322,59 @@ export default function VenueCard({
                 </h3>
 
                 <div className="flex flex-wrap gap-3">
-                  {slots.map((slot: any) => (
-                    <button
-                      key={slot.id}
-                      onClick={() =>
-                        handleBooking(
-                          slot.id
-                        )
+                  {slots.map((slot: any) => {
+                    const timeText = `${new Date(
+                      slot.startTime
+                    ).toLocaleTimeString(
+                      [],
+                      {
+                        hour:
+                          "2-digit",
+                        minute:
+                          "2-digit",
                       }
-                      disabled={
-                        loadingId === slot.id
+                    )} - ${new Date(
+                      slot.endTime
+                    ).toLocaleTimeString(
+                      [],
+                      {
+                        hour:
+                          "2-digit",
+                        minute:
+                          "2-digit",
                       }
-                      className="px-5 py-3 rounded-xl bg-orange-500 text-white hover:bg-orange-600 transition disabled:opacity-50"
-                    >
-                      {loadingId === slot.id
-                        ? "Creating..."
-                        : `${new Date(
-                            slot.startTime
-                          ).toLocaleTimeString(
-                            [],
-                            {
-                              hour:
-                                "2-digit",
-                              minute:
-                                "2-digit",
-                            }
-                          )} - ${new Date(
-                            slot.endTime
-                          ).toLocaleTimeString(
-                            [],
-                            {
-                              hour:
-                                "2-digit",
-                              minute:
-                                "2-digit",
-                            }
-                          )}`}
-                    </button>
-                  ))}
+                    )}`;
+
+                    return (
+                      <button
+                        key={slot.id}
+                        onClick={() =>
+                          handleBooking(
+                            slot.id
+                          )
+                        }
+                        disabled={
+                          loadingId ===
+                            slot.id ||
+                          slot.isBooked
+                        }
+                        className={`px-5 py-3 rounded-xl text-white transition
+                          ${
+                            slot.isBooked
+                              ? "bg-gray-400 cursor-not-allowed"
+                              : "bg-orange-500 hover:bg-orange-600"
+                          }
+                        `}
+                      >
+                        {slot.isBooked
+                          ? "Booked"
+                          : loadingId ===
+                              slot.id
+                            ? "Creating..."
+                            : timeText}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>

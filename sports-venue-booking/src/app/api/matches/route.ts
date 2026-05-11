@@ -21,6 +21,25 @@ export async function POST(req: NextRequest) {
     } = body;
 
     const splitPrice = Number((totalPrice / maxPlayers).toFixed(2));
+    const existingMatch = await prisma.match.findFirst({
+      where: {
+        venueId,
+        slotId,
+
+        status: {
+          not: "CANCELLED",
+        },
+      },
+    });
+
+    if (existingMatch) {
+      return NextResponse.json(
+        {
+          error: "This slot is already booked",
+        },
+        { status: 400 },
+      );
+    }
 
     const match = await prisma.match.create({
       data: {

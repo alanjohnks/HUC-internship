@@ -18,10 +18,7 @@ async function seed() {
 
   console.log("Database cleaned");
 
-  const password = await bcrypt.hash(
-    "adxadx",
-    10
-  );
+  const password = await bcrypt.hash("adxadx", 10);
 
   console.log("Creating admins...");
 
@@ -31,8 +28,7 @@ async function seed() {
       email: "adx@gmail.com",
       password,
       role: "ADMIN",
-      profileImage:
-        "https://i.pravatar.cc/300?img=1",
+      profileImage: "https://i.pravatar.cc/300?img=1",
     },
   });
 
@@ -42,8 +38,7 @@ async function seed() {
       email: "admin2@gmail.com",
       password,
       role: "ADMIN",
-      profileImage:
-        "https://i.pravatar.cc/300?img=2",
+      profileImage: "https://i.pravatar.cc/300?img=2",
     },
   });
 
@@ -52,19 +47,16 @@ async function seed() {
   const owners = [];
 
   for (let i = 1; i <= 5; i++) {
-    const owner =
-      await prisma.user.create({
-        data: {
-          name: `Owner ${i}`,
-          email: `owner${i}@gmail.com`,
-          password,
-          role: "OWNER",
-          bio: "Professional venue owner",
-          profileImage: `https://i.pravatar.cc/300?img=${
-            i + 10
-          }`,
-        },
-      });
+    const owner = await prisma.user.create({
+      data: {
+        name: `Owner ${i}`,
+        email: `owner${i}@gmail.com`,
+        password,
+        role: "OWNER",
+        bio: "Professional venue owner",
+        profileImage: `https://i.pravatar.cc/300?img=${i + 10}`,
+      },
+    });
 
     owners.push(owner);
   }
@@ -74,30 +66,21 @@ async function seed() {
   const users = [];
 
   for (let i = 1; i <= 5; i++) {
-    const user =
-      await prisma.user.create({
-        data: {
-          name: `User ${i}`,
-          email: `user${i}@gmail.com`,
-          password,
-          role: "USER",
-          bio: "Sports enthusiast",
-          profileImage: `https://i.pravatar.cc/300?img=${
-            i + 20
-          }`,
-        },
-      });
+    const user = await prisma.user.create({
+      data: {
+        name: `User ${i}`,
+        email: `user${i}@gmail.com`,
+        password,
+        role: "USER",
+        bio: "Sports enthusiast",
+        profileImage: `https://i.pravatar.cc/300?img=${i + 20}`,
+      },
+    });
 
     users.push(user);
   }
 
-  const sports = [
-    "Football",
-    "Cricket",
-    "Badminton",
-    "Basketball",
-    "Tennis",
-  ];
+  const sports = ["Football", "Cricket", "Badminton", "Basketball", "Tennis"];
 
   const sportsData = {
     Football: {
@@ -214,70 +197,38 @@ async function seed() {
   const venues = [];
 
   for (let i = 1; i <= 40; i++) {
-    const owner =
-      owners[
-        Math.floor(
-          Math.random() *
-            owners.length
-        )
-      ];
+    const owner = owners[Math.floor(Math.random() * owners.length)];
 
     const approved = i > 10;
 
-    const sport =
-      sports[
-        Math.floor(
-          Math.random() *
-            sports.length
-        )
-      ];
+    const sport = sports[Math.floor(Math.random() * sports.length)];
 
-    const sportData =
-      sportsData[sport];
+    const sportData = sportsData[sport];
 
     const venueName =
-      sportData.names[
-        Math.floor(
-          Math.random() *
-            sportData.names.length
-        )
-      ];
+      sportData.names[Math.floor(Math.random() * sportData.names.length)];
 
-    const venueImages =
-      sportData.images;
+    const venueImages = sportData.images;
 
-    const venue =
-      await prisma.venue.create({
-        data: {
-          name: `${venueName} ${
-            i + 10
-          }`,
+    const venue = await prisma.venue.create({
+      data: {
+        name: `${venueName} ${i + 10}`,
 
-          description: `Professional ${sport.toLowerCase()} venue with premium facilities and modern infrastructure.`,
+        description: `Professional ${sport.toLowerCase()} venue with premium facilities and modern infrastructure.`,
 
-          location:
-            locations[
-              Math.floor(
-                Math.random() *
-                  locations.length
-              )
-            ],
+        location: locations[Math.floor(Math.random() * locations.length)],
 
-          sport,
+        sport,
 
-          pricePerHour:
-            Math.floor(
-              Math.random() *
-                4000
-            ) + 500,
+        pricePerHour: Math.floor(Math.random() * 4000) + 500,
 
-          images: venueImages,
+        images: venueImages,
 
-          approved,
+        approved,
 
-          ownerId: owner.id,
-        },
-      });
+        ownerId: owner.id,
+      },
+    });
 
     venues.push(venue);
 
@@ -299,25 +250,13 @@ async function seed() {
     ];
 
     for (const slot of slotTemplates) {
-      const start =
-        new Date();
+      const start = new Date();
 
-      start.setHours(
-        slot[0],
-        0,
-        0,
-        0
-      );
+      start.setHours(slot[0], 0, 0, 0);
 
-      const end =
-        new Date();
+      const end = new Date();
 
-      end.setHours(
-        slot[1],
-        0,
-        0,
-        0
-      );
+      end.setHours(slot[1], 0, 0, 0);
 
       await prisma.slot.create({
         data: {
@@ -332,19 +271,12 @@ async function seed() {
   console.log("Creating follows...");
 
   for (const user of users) {
-    const randomOwner =
-      owners[
-        Math.floor(
-          Math.random() *
-            owners.length
-        )
-      ];
+    const randomOwner = owners[Math.floor(Math.random() * owners.length)];
 
     await prisma.follow.create({
       data: {
         followerId: user.id,
-        followingId:
-          randomOwner.id,
+        followingId: randomOwner.id,
       },
     });
 
@@ -354,171 +286,108 @@ async function seed() {
         title: "New follower",
         message: `${user.name} started following you`,
         senderId: user.id,
-        receiverId:
-          randomOwner.id,
+        receiverId: randomOwner.id,
       },
     });
   }
 
   console.log("Creating matches...");
 
-  const approvedVenues =
-    await prisma.venue.findMany({
-      where: {
-        approved: true,
+  const approvedVenues = await prisma.venue.findMany({
+    where: {
+      approved: true,
+    },
+
+    include: {
+      slots: true,
+    },
+  });
+
+  for (let i = 0; i < 25; i++) {
+    const creator = users[Math.floor(Math.random() * users.length)];
+
+    const venue =
+      approvedVenues[Math.floor(Math.random() * approvedVenues.length)];
+
+    const slot = venue.slots[Math.floor(Math.random() * venue.slots.length)];
+
+    const maxPlayers = Math.floor(Math.random() * 8) + 2;
+
+    const totalPrice = venue.pricePerHour || 1000;
+
+    const splitPrice = Number((totalPrice / maxPlayers).toFixed(2));
+
+    const visibility = Math.random() > 0.5 ? "PUBLIC" : "PRIVATE";
+
+    const match = await prisma.match.create({
+      data: {
+        title: `${venue.sport} Match ${i + 1}`,
+
+        description: "Friendly community sports match",
+
+        sport: venue.sport,
+
+        visibility,
+
+        maxPlayers,
+
+        currentPlayers: 1,
+
+        totalPrice,
+
+        splitPrice,
+
+        creatorId: creator.id,
+
+        venueId: venue.id,
+
+        slotId: slot.id,
+
+        participants: {
+          create: {
+            userId: creator.id,
+
+            paymentStatus: "PAID",
+
+            amountPaid: splitPrice,
+
+            isOrganizer: true,
+          },
+        },
+
+        ...(visibility === "PUBLIC" && {
+          chatRoom: {
+            create: {},
+          },
+        }),
       },
 
       include: {
-        slots: true,
+        chatRoom: true,
       },
     });
 
-  for (let i = 0; i < 25; i++) {
-    const creator =
-      users[
-        Math.floor(
-          Math.random() *
-            users.length
-        )
-      ];
+    const availablePlayers = users.filter((u) => u.id !== creator.id);
 
-    const venue =
-      approvedVenues[
-        Math.floor(
-          Math.random() *
-            approvedVenues.length
-        )
-      ];
-
-    const slot =
-      venue.slots[
-        Math.floor(
-          Math.random() *
-            venue.slots.length
-        )
-      ];
-
-    const maxPlayers =
-      Math.floor(
-        Math.random() * 8
-      ) + 2;
-
-    const totalPrice =
-      venue.pricePerHour ||
-      1000;
-
-    const splitPrice = Number(
-      (
-        totalPrice /
-        maxPlayers
-      ).toFixed(2)
+    const extraPlayers = Math.floor(
+      Math.random() * Math.min(maxPlayers - 1, availablePlayers.length),
     );
 
-    const visibility =
-      Math.random() > 0.5
-        ? "PUBLIC"
-        : "PRIVATE";
+    const shuffled = [...availablePlayers].sort(() => 0.5 - Math.random());
+    for (let j = 0; j < extraPlayers; j++) {
+      const player = shuffled[j];
 
-    const match =
-      await prisma.match.create({
+      await prisma.matchParticipant.create({
         data: {
-          title: `${venue.sport} Match ${
-            i + 1
-          }`,
+          userId: player.id,
 
-          description:
-            "Friendly community sports match",
+          matchId: match.id,
 
-          sport:
-            venue.sport,
+          paymentStatus: "PAID",
 
-          visibility,
-
-          maxPlayers,
-
-          currentPlayers: 1,
-
-          totalPrice,
-
-          splitPrice,
-
-          creatorId:
-            creator.id,
-
-          venueId: venue.id,
-
-          slotId: slot.id,
-
-          participants: {
-            create: {
-              userId:
-                creator.id,
-
-              paymentStatus:
-                "PAID",
-
-              amountPaid:
-                splitPrice,
-
-              isOrganizer: true,
-            },
-          },
-
-          ...(visibility ===
-            "PUBLIC" && {
-            chatRoom: {
-              create: {},
-            },
-          }),
-        },
-
-        include: {
-          chatRoom: true,
+          amountPaid: splitPrice,
         },
       });
-
-    const extraPlayers =
-      Math.floor(
-        Math.random() *
-          (maxPlayers - 1)
-      );
-
-    const shuffled =
-      [...users].sort(
-        () => 0.5 - Math.random()
-      );
-
-    for (
-      let j = 0;
-      j < extraPlayers;
-      j++
-    ) {
-      const player =
-        shuffled[j];
-
-      if (
-        player.id ===
-        creator.id
-      )
-        continue;
-
-      await prisma.matchParticipant.create(
-        {
-          data: {
-            userId:
-              player.id,
-
-            matchId:
-              match.id,
-
-            paymentStatus:
-              "PAID",
-
-            amountPaid:
-              splitPrice,
-          },
-        }
-      );
 
       await prisma.match.update({
         where: {
@@ -532,34 +401,23 @@ async function seed() {
         },
       });
 
-      await prisma.notification.create(
-        {
-          data: {
-            type:
-              "MATCH_JOINED",
+      await prisma.notification.create({
+        data: {
+          type: "MATCH_JOINED",
 
-            title:
-              "Player Joined",
+          title: "Player Joined",
 
-            message: `${player.name} joined your match`,
+          message: `${player.name} joined your match`,
 
-            senderId:
-              player.id,
+          senderId: player.id,
 
-            receiverId:
-              creator.id,
+          receiverId: creator.id,
 
-            matchId:
-              match.id,
-          },
-        }
-      );
+          matchId: match.id,
+        },
+      });
 
-      if (
-        visibility ===
-          "PUBLIC" &&
-        match.chatRoom
-      ) {
+      if (visibility === "PUBLIC" && match.chatRoom) {
         const sampleMessages = [
           "Ready for the game 🔥",
           "Who's bringing the ball?",
@@ -569,45 +427,27 @@ async function seed() {
           "Excited for tonight ⚽",
         ];
 
-        await prisma.message.create(
-          {
-            data: {
-              content:
-                sampleMessages[
-                  Math.floor(
-                    Math.random() *
-                      sampleMessages.length
-                  )
-                ],
+        await prisma.message.create({
+          data: {
+            content:
+              sampleMessages[Math.floor(Math.random() * sampleMessages.length)],
 
-              senderId:
-                player.id,
+            senderId: player.id,
 
-              chatRoomId:
-                match.chatRoom
-                  .id,
-            },
-          }
-        );
+            chatRoomId: match.chatRoom.id,
+          },
+        });
       }
     }
   }
 
-  console.log(
-    "Seed completed successfully"
-  );
+  console.log("Seed completed successfully");
 
-  console.log(
-    "ADMIN LOGIN"
-  );
+  console.log("ADMIN LOGIN");
 
-  console.log(
-    "Email: adx@gmail.com"
-  );
+  console.log("Email: adx@gmail.com");
 
-  console.log(
-    "Password: adxadx"
-  );
+  console.log("Password: adxadx");
 }
 
 seed()

@@ -125,6 +125,12 @@ export async function GET() {
         },
 
         matches: {
+          where: {
+            status: {
+              not: "CANCELLED",
+            },
+          },
+
           include: {
             creator: {
               select: {
@@ -142,13 +148,39 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json(venues);
+    const formattedVenues = venues.map(
+      (venue) => ({
+        ...venue,
+
+        slots: venue.slots.map((slot) => {
+          const isBooked =
+            venue.matches.some(
+              (match) =>
+                match.slotId === slot.id
+            );
+
+          return {
+            ...slot,
+            isBooked,
+          };
+        }),
+      }),
+    );
+
+    return NextResponse.json(
+      formattedVenues
+    );
   } catch (error: any) {
-    console.error("VENUES ERROR:", error);
+    console.error(
+      "VENUES ERROR:",
+      error
+    );
 
     return NextResponse.json(
       {
-        error: error.message || "Failed to fetch venues",
+        error:
+          error.message ||
+          "Failed to fetch venues",
       },
       { status: 500 }
     );

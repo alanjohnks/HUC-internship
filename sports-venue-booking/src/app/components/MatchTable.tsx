@@ -15,30 +15,22 @@ export default function MatchTable({
 }: MatchTableProps) {
   const router = useRouter();
 
-  const handleJoin = async (
-    matchId: string
-  ) => {
+  const handleJoin = async (matchId: string) => {
     try {
-      const token =
-        localStorage.getItem("token");
+      const token = localStorage.getItem("token");
 
-      const res = await fetch(
-        `/api/matches/${matchId}/join`,
-        {
-          method: "POST",
+      const res = await fetch(`/api/matches/${matchId}/join`, {
+        method: "POST",
 
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       const result = await res.json();
 
       if (!res.ok) {
-        alert(
-          result.error || "Failed to join"
-        );
+        alert(result.error || "Failed to join");
         return;
       }
 
@@ -98,19 +90,13 @@ export default function MatchTable({
 
           <tbody>
             {data.map((match) => {
-              const isCreator =
-                currentUser?.id ===
-                match.creatorId;
+              const isCreator = currentUser?.id === match.creatorId;
 
-              const isJoined =
-                match.participants?.some(
-                  (p: any) =>
-                    p.userId === currentUser?.id
-                );
+              const isJoined = match.participants?.some(
+                (p: any) => p.userId === currentUser?.id,
+              );
 
-              const isFull =
-                match.currentPlayers >=
-                match.maxPlayers;
+              const isFull = match.currentPlayers >= match.maxPlayers;
 
               return (
                 <tr
@@ -120,8 +106,7 @@ export default function MatchTable({
                   <td className="px-6 py-4">
                     <div>
                       <p className="font-semibold text-gray-800">
-                        {match.title ||
-                          "Untitled Match"}
+                        {match.title || "Untitled Match"}
                       </p>
 
                       <p className="text-xs text-gray-500 mt-1">
@@ -137,9 +122,7 @@ export default function MatchTable({
                       </p>
 
                       <p className="text-xs text-gray-500">
-                        {
-                          match.venue?.location
-                        }
+                        {match.venue?.location}
                       </p>
                     </div>
                   </td>
@@ -147,8 +130,7 @@ export default function MatchTable({
                   <td className="px-6 py-4">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        match.visibility ===
-                        "PUBLIC"
+                        match.visibility === "PUBLIC"
                           ? "bg-blue-100 text-blue-700"
                           : "bg-purple-100 text-purple-700"
                       }`}
@@ -159,41 +141,30 @@ export default function MatchTable({
 
                   <td className="px-6 py-4">
                     <p className="font-medium text-gray-700">
-                      {
-                        match.currentPlayers
-                      }
-                      /{match.maxPlayers}
+                      {match.currentPlayers}/{match.maxPlayers}
                     </p>
                   </td>
 
                   <td className="px-6 py-4">
                     <div>
                       <p className="font-semibold text-gray-800">
-                        ₹
-                        {
-                          match.splitPrice
-                        }
+                        ₹{match.splitPrice}
                       </p>
 
-                      <p className="text-xs text-gray-500">
-                        split
-                      </p>
+                      <p className="text-xs text-gray-500">split</p>
                     </div>
                   </td>
 
                   <td className="px-6 py-4">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        match.status ===
-                        "OPEN"
+                        match.status === "OPEN"
                           ? "bg-green-100 text-green-700"
-                          : match.status ===
-                            "FULL"
-                          ? "bg-orange-100 text-orange-700"
-                          : match.status ===
-                            "COMPLETED"
-                          ? "bg-gray-200 text-gray-700"
-                          : "bg-red-100 text-red-700"
+                          : match.status === "FULL"
+                            ? "bg-orange-100 text-orange-700"
+                            : match.status === "COMPLETED"
+                              ? "bg-gray-200 text-gray-700"
+                              : "bg-red-100 text-red-700"
                       }`}
                     >
                       {match.status}
@@ -201,25 +172,17 @@ export default function MatchTable({
                   </td>
 
                   <td className="px-6 py-4 text-gray-600">
-                    {new Date(
-                      match.createdAt
-                    ).toLocaleDateString()}
+                    {new Date(match.createdAt).toLocaleDateString()}
                   </td>
 
                   <td className="px-6 py-4">
-                    {match.visibility ===
-                      "PRIVATE" &&
-                    !isCreator ? (
+                    {match.visibility === "PRIVATE" && !isCreator ? (
                       <span className="text-xs text-gray-400">
                         Private Match
                       </span>
                     ) : isCreator ? (
                       <button
-                        onClick={() =>
-                          router.push(
-                            "/dashboard?tab=chats"
-                          )
-                        }
+                        onClick={() => router.push("/dashboard?tab=chats")}
                         className="bg-gray-800 text-white px-4 py-2 rounded-lg text-xs hover:bg-black"
                       >
                         Manage Match
@@ -237,14 +200,15 @@ export default function MatchTable({
                       </button>
                     ) : (
                       <button
-                        onClick={() =>
-                          handleJoin(
-                            match.id
-                          )
-                        }
-                        className="bg-orange-500 text-white px-4 py-2 rounded-lg text-xs hover:bg-orange-600"
+                        onClick={() => handleJoin(match.id)}
+                        disabled={match.status === "COMPLETED"}
+                        className={`px-4 py-2 rounded-lg text-xs text-white ${
+                          match.status === "COMPLETED"
+                            ? "bg-gray-400 cursor-not-allowed"
+                            : "bg-orange-500 hover:bg-orange-600"
+                        }`}
                       >
-                        Join Match
+                        {match.status === "COMPLETED" ? "Closed" : "Join Match"}
                       </button>
                     )}
                   </td>
@@ -256,9 +220,7 @@ export default function MatchTable({
       </div>
 
       {data.length === 0 && (
-        <div className="p-10 text-center text-gray-500">
-          No matches found
-        </div>
+        <div className="p-10 text-center text-gray-500">No matches found</div>
       )}
     </div>
   );
